@@ -18,7 +18,7 @@ namespace LordAshes
 		// Plugin info
 		public const string Name = "Chat Whisper Plug-In";
 		public const string Guid = "org.lordashes.plugins.chatwhisper";
-		public const string Version = "1.0.1.0";
+		public const string Version = "1.1.0.0";
 
         /// <summary>
         /// Function for initializing plugin
@@ -35,6 +35,7 @@ namespace LordAshes
                     chatMessage = chatMessage.Substring(2).Trim() + " ";
                     string target = chatMessage.Substring(0, chatMessage.IndexOf(" "));
                     if (target == ".") { target = CampaignSessionManager.GetPlayerName(LocalPlayer.Id); }
+                    if (target == ".." || target.ToUpper() == "GM") { target = FindGM(); }
                     chatMessage = chatMessage.Substring(chatMessage.IndexOf(" ") + 1);
                     Debug.Log("Whisper From '" + sender + "' To '" + target + "' (Received By '" + CampaignSessionManager.GetPlayerName(LocalPlayer.Id) + "')");
                     if (CampaignSessionManager.GetPlayerName(LocalPlayer.Id) != target)
@@ -45,6 +46,34 @@ namespace LordAshes
                 }
                 return chatMessage;
             });
+
+            ChatServicePlugin.handlers.Add("/w! ", (chatMessage, sender, source) =>
+            {
+                if (chatMessage.StartsWith("/w!"))
+                {
+                    chatMessage = chatMessage.Substring(3).Trim() + " ";
+                    string target = chatMessage.Substring(0, chatMessage.IndexOf(" "));
+                    if (target == ".") { target = CampaignSessionManager.GetPlayerName(LocalPlayer.Id); }
+                    if (target == ".." || target.ToUpper() == "GM") { target = FindGM(); }
+                    chatMessage = chatMessage.Substring(chatMessage.IndexOf(" ") + 1);
+                    Debug.Log("Whisper From '" + sender + "' To Everyone But '" + target + "' (Received By '" + CampaignSessionManager.GetPlayerName(LocalPlayer.Id) + "')");
+                    if (CampaignSessionManager.GetPlayerName(LocalPlayer.Id) == target)
+                    {
+                        return null;
+                    }
+                    chatMessage = "(Whisper) " + chatMessage;
+                }
+                return chatMessage;
+            });
+        }
+
+        public static string FindGM()
+        {
+            foreach(KeyValuePair<PlayerGuid, PlayerInfo> player in CampaignSessionManager.PlayersInfo)
+            {
+                if (player.Value.Rights.CanGm) { return player.Value.Name; }
+            }
+            return "";
         }
     }
 }
