@@ -5,12 +5,14 @@ with the matching name will see the chat message.
  
 ## Change Log
 
-```1.2.1: Improved GM detection method for GM shortcuts
+```
+1.2.1: Improved GM detection method for GM shortcuts
 1.2.0: Added whisper to everyone but function
 1.2.0: Added shortcut for GM
 1.0.1: Updated to latest Chat Service plugin version
 1.0.1: Added period shortcut for own name (allows whispering to self to leave self notes)
-1.0.0: Initial release```
+1.0.0: Initial release
+```
 
 ## Install
 
