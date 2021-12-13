@@ -18,7 +18,7 @@ namespace LordAshes
 		// Plugin info
 		public const string Name = "Chat Whisper Plug-In";
 		public const string Guid = "org.lordashes.plugins.chatwhisper";
-		public const string Version = "1.1.0.0";
+		public const string Version = "1.2.1.0";
 
         /// <summary>
         /// Function for initializing plugin
@@ -35,7 +35,7 @@ namespace LordAshes
                     chatMessage = chatMessage.Substring(2).Trim() + " ";
                     string target = chatMessage.Substring(0, chatMessage.IndexOf(" "));
                     if (target == ".") { target = CampaignSessionManager.GetPlayerName(LocalPlayer.Id); }
-                    if (target == ".." || target.ToUpper() == "GM") { target = FindGM(); }
+                    if (target == ".." || target.ToUpper() == "GM") { target = FindGMs()[0]; }
                     chatMessage = chatMessage.Substring(chatMessage.IndexOf(" ") + 1);
                     Debug.Log("Whisper From '" + sender + "' To '" + target + "' (Received By '" + CampaignSessionManager.GetPlayerName(LocalPlayer.Id) + "')");
                     if (CampaignSessionManager.GetPlayerName(LocalPlayer.Id) != target)
@@ -54,7 +54,7 @@ namespace LordAshes
                     chatMessage = chatMessage.Substring(3).Trim() + " ";
                     string target = chatMessage.Substring(0, chatMessage.IndexOf(" "));
                     if (target == ".") { target = CampaignSessionManager.GetPlayerName(LocalPlayer.Id); }
-                    if (target == ".." || target.ToUpper() == "GM") { target = FindGM(); }
+                    if (target == ".." || target.ToUpper() == "GM") { target = FindGMs()[0]; }
                     chatMessage = chatMessage.Substring(chatMessage.IndexOf(" ") + 1);
                     Debug.Log("Whisper From '" + sender + "' To Everyone But '" + target + "' (Received By '" + CampaignSessionManager.GetPlayerName(LocalPlayer.Id) + "')");
                     if (CampaignSessionManager.GetPlayerName(LocalPlayer.Id) == target)
@@ -67,13 +67,26 @@ namespace LordAshes
             });
         }
 
-        public static string FindGM()
+        public static List<string> FindGMs()
         {
-            foreach(KeyValuePair<PlayerGuid, PlayerInfo> player in CampaignSessionManager.PlayersInfo)
+            List<string> names = new List<string>();
+            foreach (PlayerGuid player in CampaignSessionManager.PlayersInfo.Keys)
             {
-                if (player.Value.Rights.CanGm) { return player.Value.Name; }
+                List<ClientGuid> list = new List<ClientGuid>();
+                if (BoardSessionManager.PlayersClientsGuids.TryGetValue(player, out list))
+                {
+                    int count = list.Count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        ClientMode clientMode;
+                        if (BoardSessionManager.ClientsModes.TryGetValue(list[i], out clientMode) && clientMode == ClientMode.GameMaster)
+                        {
+                            names.Add(CampaignSessionManager.GetPlayerName(player));
+                        }
+                    }
+                }
             }
-            return "";
+            return (names.Count > 0) ? names : new List<string>() { "None" };
         }
     }
 }
