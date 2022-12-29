@@ -18,7 +18,9 @@ namespace LordAshes
 		// Plugin info
 		public const string Name = "Chat Whisper Plug-In";
 		public const string Guid = "org.lordashes.plugins.chatwhisper";
-		public const string Version = "1.2.1.0";
+		public const string Version = "1.3.1.0";
+
+        private ConfigEntry<string> whisperIdentifier;
 
         /// <summary>
         /// Function for initializing plugin
@@ -28,12 +30,15 @@ namespace LordAshes
 		{
 			UnityEngine.Debug.Log("Chat Whisper Plugin: Active.");
 
-            ChatServicePlugin.handlers.Add("/w ", (chatMessage, sender, source) =>
+            whisperIdentifier = Config.Bind("Settings", "Whisper message suffix", "<size=16>(Whisper)</size>");
+
+            ChatServicePlugin.ChatMessageService.AddHandler("/w ", (chatMessage, sender, source) =>
             {
                 if (chatMessage.StartsWith("/w"))
                 {
                     chatMessage = chatMessage.Substring(2).Trim() + " ";
                     string target = chatMessage.Substring(0, chatMessage.IndexOf(" "));
+                    target = target.Replace(" ", " "); // Convert ALT+255 to space (use for names with spaces)
                     if (target == ".") { target = CampaignSessionManager.GetPlayerName(LocalPlayer.Id); }
                     if (target == ".." || target.ToUpper() == "GM") { target = FindGMs()[0]; }
                     chatMessage = chatMessage.Substring(chatMessage.IndexOf(" ") + 1);
@@ -42,12 +47,12 @@ namespace LordAshes
                     {
                         return null;
                     }
-                    chatMessage = "(Whisper) " + chatMessage;
+                    chatMessage = chatMessage+whisperIdentifier.Value;
                 }
                 return chatMessage;
             });
 
-            ChatServicePlugin.handlers.Add("/w! ", (chatMessage, sender, source) =>
+            ChatServicePlugin.ChatMessageService.AddHandler("/w! ", (chatMessage, sender, source) =>
             {
                 if (chatMessage.StartsWith("/w!"))
                 {
@@ -61,7 +66,7 @@ namespace LordAshes
                     {
                         return null;
                     }
-                    chatMessage = "(Whisper) " + chatMessage;
+                    chatMessage = chatMessage+whisperIdentifier.Value;
                 }
                 return chatMessage;
             });
