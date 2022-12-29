@@ -6,6 +6,9 @@ with the matching name will see the chat message.
 ## Change Log
 
 ```
+1.3.1: Moved whisper identifier to end of message for greater compatibility with other chat services
+1.3.1: Exposed whispter identifier as a config allowing diffrent word or different size
+1.3.0: Added support for names with spaces by replacing space with ALT+255
 1.2.1: Improved GM detection method for GM shortcuts
 1.2.0: Added whisper to everyone but function
 1.2.0: Added shortcut for GM
